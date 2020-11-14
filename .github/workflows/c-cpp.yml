@@ -20,7 +20,6 @@ jobs:
         git config --local user.name "CI"
         git fetch
         git submodule foreach git pull src/stb master
-        ls -r
 
     - name: Dependency - MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
@@ -35,8 +34,9 @@ jobs:
         msbuild src.sln -p:OutDir="out/"
 
     - name: execute
+      working-directory: src/out
       run: |
-        out/src.exe
+        src.exe
         ls
       
 
