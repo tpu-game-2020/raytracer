@@ -30,14 +30,14 @@ jobs:
       working-directory: src
       continue-on-error: true
       run: |
-        ls stb -r
         msbuild src.sln -p:OutDir="out/"
 
     - name: execute
-      working-directory: src/out
+      working-directory: src
       run: |
-        src.exe
-        ls
+        ls -r
+        out/src.exe
+        ls -r
       
 
 #    - name: commit result
