@@ -40,13 +40,8 @@ jobs:
         cp result.png ../
 
     - name: commit result
-      working-directory: src
       run: |
-        git add ../result.png
+        git add -f result.png
         git commit -m "Add result" -a
         git pull
         git push origin result
-#    - name: make check
-#      run: make check
-#    - name: make distcheck
-#      run: make distcheck
