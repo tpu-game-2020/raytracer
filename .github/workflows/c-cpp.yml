@@ -23,9 +23,9 @@ jobs:
 #      run: ./configure
     - name: make clean
       run: |
-        cd src
         ls
         make clean
+      working-directory: ./src/
     - name: make depend
       run: make depend
     - name: make
