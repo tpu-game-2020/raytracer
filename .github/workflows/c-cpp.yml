@@ -12,7 +12,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout
     - uses: actions/checkout@v2
 
     - name: Dependency - MSBuild
@@ -26,23 +25,24 @@ jobs:
       run: msbuild src.sln -p:OutDir="out/"
 
     - name: execute
-      working-directory: out/
-      run: src.exe
+      run: |
+        src/x64/Debug/src.exe
+        ls
       
-    - name: git setting
-      run: |
-        git config --local user.email "test@mail.com"
-        git config --local user.name "CI"
-        git fetch
-        git checkout result
+#    - name: git setting
+#      run: |
+#        git config --local user.email "test@mail.com"
+#        git config --local user.name "CI"
+#        git fetch
+#        git checkout result
 
-    - name: commit result
-      run: |
-        echo " " >> result.png
-        git add result.png
-        git commit -m "Add result" -a
-        git pull
-        git push origin result
+#    - name: commit result
+#      run: |
+#        echo " " >> result.png
+#        git add result.png
+#        git commit -m "Add result" -a
+#        git pull
+#        git push origin result
 #    - name: make check
 #      run: make check
 #    - name: make distcheck

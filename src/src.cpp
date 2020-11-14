@@ -1,11 +1,26 @@
 ﻿// src.cpp : このファイルには 'main' 関数が含まれています。プログラム実行の開始と終了がそこで行われます。
 //
-
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <iostream>
+
+#include "stb/stb_image.h"
+#include "stb/stb_image_write.h"
+
+
+#define WIDTH 300
+#define HEIGHT 200
+
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	unsigned char image[3 * WIDTH * HEIGHT];
+
+	// save
+	int w = WIDTH;
+	int h = HEIGHT;
+	int comp = STBI_rgb; // RGB
+	int stride_in_bytes = 3 * w;
+	int result = stbi_write_png("result.png", w, h, comp, image, stride_in_bytes);
 }
 
 // プログラムの実行: Ctrl + F5 または [デバッグ] > [デバッグなしで開始] メニュー
