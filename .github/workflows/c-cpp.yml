@@ -13,13 +13,26 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: git setting
+      run: |
+        git config --local user.email "test@mail.com"
+        git config --local user.name "CI"
+        git checkout result
     - name: cd
       run: cd src
-    - name: configure
-      run: ./configure
+#    - name: configure
+#      run: ./configure
     - name: make
       run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+    - name: execute
+      run: a.out
+    - name: commit result
+      run: |
+        git add result.png
+        git commit -m "Add result" -a
+        git pull
+        git push origin result
+#    - name: make check
+#      run: make check
+#    - name: make distcheck
+#      run: make distcheck
