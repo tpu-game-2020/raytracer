@@ -1,4 +1,4 @@
-TARGET=./bin/a.out
+TARGET=./a.out
 
 CPP=g++
 OPT=-std=c++0x  -static-libgcc -static-libstdc++ -L. -fopenmp -O3
