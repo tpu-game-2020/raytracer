@@ -41,6 +41,7 @@ jobs:
 
     - name: commit result
       run: |
+        ls
         git add -f result.png
         git commit -m "Add result" -a
         git pull
