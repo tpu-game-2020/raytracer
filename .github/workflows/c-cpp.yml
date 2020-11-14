@@ -21,6 +21,8 @@ jobs:
         git checkout result
     - name: cd
       run: cd src
+    - name: ls
+      run: ls
 #    - name: configure
 #      run: ./configure
     - name: make clean
