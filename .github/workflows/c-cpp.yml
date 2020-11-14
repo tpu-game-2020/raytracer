@@ -20,7 +20,6 @@ jobs:
         git config --local user.name "CI"
         git fetch
         git submodule update --remote
-        ls -r
 
     - name: Dependency - MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
@@ -31,7 +30,7 @@ jobs:
       working-directory: src
       continue-on-error: true
       run: |
-        ls -r
+        ls stb -r
         msbuild src.sln -p:OutDir="out/"
 
     - name: execute
