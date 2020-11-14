@@ -20,9 +20,9 @@ jobs:
         git fetch
         git checkout result
     - name: cd
-      run: cd src
-    - name: ls
-      run: ls
+      run: |
+        cd src
+        ls
 #    - name: configure
 #      run: ./configure
     - name: make clean
