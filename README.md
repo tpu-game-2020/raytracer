@@ -5,8 +5,9 @@ CG概論の課題です。
 
 [![Actions Status](https://github.com/tpu-game-2020/raytracer/workflows/CI/badge.svg)](https://github.com/tpu-game-2020/raytracer/actions)
 
-（このファイルの上の行の[tpu-game-2020]の部分(2か所)を自分のアカウント名に修正してください）
+![結果画像](https://github.com/tpu-game-2020/raytracer/blob/result/result.png)
 
+（このファイルの上の行の[tpu-game-2020]の部分(3か所)を自分のアカウント名に修正してください）
 
 # 進め方
 * 本リポジトリをforkしてください
