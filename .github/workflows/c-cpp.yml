@@ -19,14 +19,13 @@ jobs:
         git config --local user.name "CI"
         git fetch
         git checkout result
-    - name: cd
-      run: |
-        cd src
-        ls
 #    - name: configure
 #      run: ./configure
     - name: make clean
-      run: make clean
+      run: |
+        cd src
+        ls
+        make clean
     - name: make depend
       run: make depend
     - name: make
