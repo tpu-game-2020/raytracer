@@ -6,7 +6,7 @@ INC=
 LIB=
 
 -include makefile.opt
-ln -s `g++ -print-file-name=libgomp.a`
+	ln -s `g++ -print-file-name=libgomp.a`
 
 .SUFFIXES:.cpp .c .o .h
 
