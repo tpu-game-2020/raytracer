@@ -19,7 +19,7 @@ jobs:
         git config --local user.email "test@mail.com"
         git config --local user.name "CI"
         git fetch
-        git submodule update --remote
+        git submodule add https://github.com/nothings/stb.git src/stb
 
     - name: Dependency - MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
