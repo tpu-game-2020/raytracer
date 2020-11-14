@@ -38,9 +38,9 @@ jobs:
         git checkout result
         ls -r
         ../../src.exe
+        cp result.png ../
 
     - name: commit result
-      working-directory: src
       run: |
         ls -r
         git add result.png
