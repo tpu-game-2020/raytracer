@@ -40,6 +40,7 @@ jobs:
         cp result.png ../
 
     - name: commit result
+      working-directory: ./
       run: |
         git add result.png
         git commit -m "Add result" -a
