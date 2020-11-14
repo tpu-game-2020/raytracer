@@ -19,7 +19,6 @@ jobs:
         git config --local user.email "test@mail.com"
         git config --local user.name "CI"
         git fetch
-        git checkout result
 
     - name: Dependency - MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
@@ -35,8 +34,10 @@ jobs:
     - name: execute
       working-directory: src
       run: |
+        cp out/src.exe ../../
+        git checkout result
         ls -r
-        out/src.exe
+        ../../src.exe
 
     - name: commit result
       working-directory: src
