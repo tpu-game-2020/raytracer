@@ -30,7 +30,7 @@ jobs:
       working-directory: src
       continue-on-error: true
       run: |
-        msbuild src.sln -p:OutDir="out/"
+        msbuild src.sln -p:OutDir="out/" -m
 
     - name: execute
       working-directory: src
@@ -42,6 +42,7 @@ jobs:
       working-directory: src
       run: |
         ls -r
+        git checkout result
         git add result.png
         git commit -m "Add result" -a
         git pull
