@@ -168,8 +168,8 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 	// 屈折
 	if (0.0f < m->transmission) {
 		float new_index = (0.0f < dot(dir, normal)) ? 1.0f : m->refraction_index; // 出ていくか入っていくか?
-		Vector3 pall = sub(dir, scale(normal, dot(dir, normal)));// 平行成分
-		Vector3 vert = sub(dir, pall);// 垂直成分
+		Vector3 vert = scale(normal, dot(dir, normal));// 垂直成分
+		Vector3 pall = sub(dir, vert);// 平行成分
 		Vector3 reflact = normalize(add(vert, scale(pall, new_index / index)));
 		new_pos = add(new_pos, scale(reflact, 0.01f));
 		col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
