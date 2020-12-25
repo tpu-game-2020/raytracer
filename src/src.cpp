@@ -117,7 +117,7 @@ float is_collide(const Sphere *p, const Vector3 pos, const Vector3 dir)
 /// ■ レイトレコア
 Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float index = 1.0f)
 {
-	Vector3 col = { 1.00f,0.97f, 1.00f };// 何も衝突しないときは空な色
+	Vector3 col = { 5.00f,0.97f, 1.00f };// 何も衝突しないときは空な色
 
 	// 何度も反射する場合は途中で打ち切り
 	if (10 < ++depth) return col;
