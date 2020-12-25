@@ -81,7 +81,6 @@ Vector3 get_ray_dir(float u, float v,
 		add(scale(dx, proj_x * sx)
 			, scale(dy, proj_y * sy))));
 }
-
 /// ■ オブジェクト
 typedef struct {
 	Vector3 albedo;        // 拡散反射係数
@@ -105,19 +104,19 @@ float is_collide(const Sphere *p, const Vector3 pos, const Vector3 dir)
 	float c = dot(oc, oc) - p->radisu * p->radisu;
 	float discriminant = b * b - a * c;
 
-	if (discriminant < 0.0f) return -1.0f; //衝突しませんでした
+	if (discriminant < 0.0f) return -1.0f;//衝突しませんでした
 
-	// 手前の交点を返す
-	float t = (-b - sqrtf(discriminant)) / a;
-	if (0.0f < t) return t; // 正でなければだめ
+		// 手前の交点を返す
+		float t = (-b - sqrtf(discriminant)) / a;
+		if (0.0f < t) return t; // 正でなければだめ
 
-	return (-b + sqrtf(discriminant)) / a;// 奥の交点を返す
+		return (-b + sqrtf(discriminant)) / a;// 奥の交点を返す
 }
 
 /// ■ レイトレコア
 Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float index = 1.0f)
 {
-	Vector3 col = { 0.97f, 1.00f, 1.00f };// 何も衝突しないときは空な色
+	Vector3 col = { 0.97f, 0.63f, 0.00f };// 何も衝突しないときは空な色
 
 	// 何度も反射する場合は途中で打ち切り
 	if (10 < ++depth) return col;
@@ -127,13 +126,15 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		//  x        y        z          r       R      G      B     反射  透過  屈折率
 		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{1.00f, 0.00f, 0.00f}, 0.02f,0.0f} },// 空中の球(赤)
 		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.80f, 0.10f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折)
-		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)
-		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
+		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f } },// 空中の球(反射)
+		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.93f, 0.93f, 0.93f}, 0.20f,0.0f} },// 地面
 		{{1000.0f, 10000.0f,500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
+		{{ 0.0f,    0.5f,    1.0f},    0.75f, {{1.00f, 1.00f, 1.00f}, 0.0f, 1.0f,  1.0f} },//空中の球(赤)のバウンディングボリューム
 	};
 
 	float min_t = 100000000000.0f;// 十分遠い場所
 	int min_idx = -1;
+
 	for (int i = 0; i < sizeof(obj)/sizeof(obj[0]); i++) 
 	{
 		// 一番近いオブジェクトを検索
@@ -144,40 +145,43 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		}
 	}
 
-	// 衝突しなかったら、空な色を返す
-	if (min_idx < 0) return col;
+	if (min_idx >= 0)
+	{
+		// 色計算
+		const Sphere* p = &obj[min_idx];
+		const Material* m = &p->material;
+		Vector3 new_pos = add(pos, scale(dir, min_t));// 少し前に出して再判定されるのを防ぐ
+		Vector3 normal = normalize(sub(new_pos, p->center));
 
-	// 色計算
-	const Sphere* p = &obj[min_idx];
-	const Material* m = &p->material;
-	Vector3 new_pos = add(pos, scale(dir, min_t));// 少し前に出して再判定されるのを防ぐ
-	Vector3 normal = normalize(sub(new_pos, p->center));
+		// 発光
+		float emmisive = 1.0f - m->reflection - m->transmission;
+		col = { 0.0f, 0.0f, 0.0f };// 発光がなければ黒
+		if (0.0f < emmisive) {
+			col = scale(p->material.albedo, emmisive);
+		}
 
-	// 発光
-	float emmisive = 1.0f - m->reflection - m->transmission;
-	col = { 0.0f, 0.0f, 0.0f };// 発光がなければ黒
-	if (0.0f < emmisive) {
-		col = scale(p->material.albedo, emmisive);
+		// 反射
+		if (0.0f < m->reflection) {
+			Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
+			col = add(col, scale(RayTracing(new_pos, reflect, depth, index), m->reflection));
+		}
+
+		// 屈折
+		if (0.0f < m->transmission) {
+			float new_index = (0.0f < dot(dir, normal)) ? 1.0f : m->refraction_index; // 出ていくか入っていくか?
+			Vector3 vert = scale(normal, dot(dir, normal));// 垂直成分
+			Vector3 pall = sub(dir, vert);// 平行成分
+			Vector3 reflact = normalize(add(vert, scale(pall, index / new_index)));
+			new_pos = add(new_pos, scale(reflact, 0.01f));
+			col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
+		}
 	}
-
-	// 反射
-	if (0.0f < m->reflection) {
-		Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
-		col = add(col, scale(RayTracing(new_pos, reflect, depth, index), m->reflection));
+	else
+	{
+		return col;// 衝突しなかったら、空な色を返す
 	}
-	// 屈折
-	if (0.0f < m->transmission) {
-		float new_index = (0.0f < dot(dir, normal)) ? 1.0f : m->refraction_index; // 出ていくか入っていくか?
-		Vector3 vert = scale(normal, dot(dir, normal));// 垂直成分
-		Vector3 pall = sub(dir, vert);// 平行成分
-		Vector3 reflact = normalize(add(vert, scale(pall, index / new_index)));
-		new_pos = add(new_pos, scale(reflact, 0.01f));
-		col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
-	}
-
 	return col;
 }
-
 
 /// ■ エントリーポイント
 int main()
@@ -201,7 +205,6 @@ int main()
 		for (int x = 0; x < WIDTH; x++) {
 			float u = ((float)x + 0.5f) / (float)WIDTH;
 			float v = ((float)y + 0.5f) / (float)HEIGHT;
-			
 			Vector3 dir = get_ray_dir(u, v, camera_up, camera_dir, fov, aspect);
 			image[y * WIDTH + x] = RayTracing(camera_pos, dir);
 		}
@@ -230,4 +233,3 @@ int main()
 	free(file_image);
 	free(image);
 }
-
