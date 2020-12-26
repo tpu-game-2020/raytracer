@@ -162,7 +162,9 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 
 	// 反射
 	if (0.0f < m->reflection) {
-		Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
+		Vector3 reflect1 = add(dir, scale(normal, -2.0f * dot(normal, dir)));
+		Vector3 reflect2 = scale(scale(reflect1, -2.0f), dot(normal, dir));		//拡散反射
+		Vector3 reflect = add(reflect1, reflect2);
 		col = add(col, scale(RayTracing(new_pos, reflect, depth, index), m->reflection));
 	}
 	// 屈折
@@ -174,6 +176,28 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		new_pos = add(new_pos, scale(reflact, 0.01f));
 		col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
 	}
+	//影
+	Vector3 obj_pos = obj[4].center;		//物体の位置
+	Vector3 obj_up = { 0.0f,1.0f,0.0f };	//カメラの上方向
+	Vector3 obj_dir = obj[min_idx].center;	//視線方向（物体から光源への）
+	float t2 = -1;
+	for (int i = 0; i < sizeof(obj) / sizeof(obj[0]); i++)
+	{
+		if (i != min_idx && i != 4)
+		{
+			// 一番近いオブジェクトを検索
+			t2 = is_collide(&obj[i], obj_pos, dir);
+		}
+	}
+	//物体と光源の間に他の物体があったら黒
+	if (0.0001f < t2)
+	{
+		if (0.0f < m->reflection)
+			col = { 0.7f, 0.0f, 0.0f };
+		if (0.0f < m->transmission)
+			col = sub(col, { 0.1f,0.1f,0.1f });
+	}
+
 
 	return col;
 }
