@@ -1,7 +1,7 @@
 ﻿# レイトレーシングを実装してみる
 CG概論の課題です（〆切：12/28）。
 
-簡単なレイトレーシングのプログラムを作成しました。このファイルを自分が思ったように拡張してください。
+簡単なレイトレーシングのプログラムを作成しました。このファイルを自分が思ったように拡張してください。 
 
 [![Actions Status](https://github.com/Hiroki-Hoso/raytracer/workflows/CI/badge.svg)](https://github.com/Hiroki-Hoso/raytracer/actions)
 
