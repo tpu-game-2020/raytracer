@@ -18,7 +18,6 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 
-
 /// ■ 大事な定数
 #define PI 3.141592653589793826433f
 
@@ -30,26 +29,26 @@ typedef struct {
 	float x, y, z;
 }Vector3;
 
-Vector3 add(const Vector3 v0, const Vector3 v1)
+Vector3 add(const Vector3 v0, const Vector3 v1) //加減
 {
-	Vector3 ret = {v0.x + v1.x, v0.y + v1.y, v0.z + v1.z};
+	Vector3 ret = { v0.x + v1.x, v0.y + v1.y, v0.z + v1.z };
 	return ret;
 }
-Vector3 sub(const Vector3 v0, const Vector3 v1)
+Vector3 sub(const Vector3 v0, const Vector3 v1) //減算
 {
 	Vector3 ret = { v0.x - v1.x, v0.y - v1.y, v0.z - v1.z };
 	return ret;
 }
-Vector3 scale(const Vector3 v, float f)
+Vector3 scale(const Vector3 v, float f) //スカラー倍
 {
-	Vector3 ret = {v.x * f, v.y * f, v.z * f};
+	Vector3 ret = { v.x * f, v.y * f, v.z * f };
 	return ret;
 }
-float dot(const Vector3 v0, const Vector3 v1) 
+float dot(const Vector3 v0, const Vector3 v1) //ドット積
 {
 	return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
 }
-Vector3 cross(const Vector3 v0, const Vector3 v1)
+Vector3 cross(const Vector3 v0, const Vector3 v1) //クロス積
 {
 	Vector3 ret = {
 		v0.y * v1.z - v0.z * v1.y,
@@ -58,10 +57,10 @@ Vector3 cross(const Vector3 v0, const Vector3 v1)
 	};
 	return ret;
 }
-Vector3 normalize(const Vector3 v)
+Vector3 normalize(const Vector3 v) //（ドット積を使った）正規化
 {
 	float len = sqrtf(dot(v, v));
-	Vector3 ret = {v.x / len, v.y / len, v.z / len};
+	Vector3 ret = { v.x / len, v.y / len, v.z / len };
 	return ret;
 }
 
@@ -72,32 +71,38 @@ Vector3 get_ray_dir(float u, float v,
 	float proj_x = u * 2.0f - 1.0f; // [0,1]->[-1,+1]
 	float proj_y = -v * 2.0f + 1.0f; // [0,1]->[+1,-1] 画像とクリップ座標系はy軸反転
 
+	//カメラの上をまっすぐ向いたベクトル
 	Vector3 dx = normalize(cross(camera_dir, camera_up));
+	//カメラの横方向と視線ベクトルの直行する値(上向き方向の補正)
 	Vector3 dy = normalize(cross(dx, camera_dir));
 
+	//視野角(縦のスクリーン)
 	float sy = tanf(0.5f * fov);
+	//横のスクリーン
 	float sx = sy / aspect;
-	return normalize(add(normalize(camera_dir),
-		add(scale(dx, proj_x * sx)
-			, scale(dy, proj_y * sy))));
+	return normalize(add(normalize(camera_dir),add(scale(dx, proj_x * sx), scale(dy, proj_y * sy))));
 }
 
 /// ■ オブジェクト
 typedef struct {
-	Vector3 albedo;        // 拡散反射係数
-	float reflection;      // 反射係数
-	float transmission;    // 透過係数
-	float refraction_index;// 屈折率
+	Vector3 albedo;        // 拡散反射係数(色)
+	float reflection;      // 反射係数(反射の強さ)
+	float transmission;    // 透過係数(透過の強さ)
+	float refraction_index;// 屈折率(透過の)
 } Material;
 
+//球
 typedef struct {
+	//中心位置
 	Vector3 center;
+	//半径
 	float radisu;
+	//素材
 	Material material;
 } Sphere;
 
 // 交差判定
-float is_collide(const Sphere *p, const Vector3 pos, const Vector3 dir)
+float is_collide(const Sphere* p, const Vector3 pos, const Vector3 dir)
 {
 	Vector3 oc = sub(pos, p->center);
 	float a = dot(dir, dir);
@@ -105,9 +110,9 @@ float is_collide(const Sphere *p, const Vector3 pos, const Vector3 dir)
 	float c = dot(oc, oc) - p->radisu * p->radisu;
 	float discriminant = b * b - a * c;
 
-	if (discriminant < 0.0f) return -1.0f; //衝突しませんでした
+	if (discriminant < 0.0f) return -1.0f; //(負だったら)衝突しませんでした
 
-	// 手前の交点を返す
+	// 手前の交点を返す sqrtf=ルート
 	float t = (-b - sqrtf(discriminant)) / a;
 	if (0.0f < t) return t; // 正でなければだめ
 
@@ -128,20 +133,22 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{1.00f, 0.00f, 0.00f}, 0.02f,0.0f} },// 空中の球(赤)
 		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.80f, 0.10f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折)
 		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)
-		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
+		{{ 0.0f, -10000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
 		{{1000.0f, 10000.0f,500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
 	};
 
 	float min_t = 100000000000.0f;// 十分遠い場所
 	int min_idx = -1;
-	for (int i = 0; i < sizeof(obj)/sizeof(obj[0]); i++) 
+	for (int i = 0; i < sizeof(obj) / sizeof(obj[0]); i++)
 	{
 		// 一番近いオブジェクトを検索
 		float t = is_collide(&obj[i], pos, dir);
+
 		if (0.0001f < t && t < min_t) {// 何度も衝突するのを防ぐために少し前の値を採用
 			min_t = t;
 			min_idx = i;
 		}
+
 	}
 
 	// 衝突しなかったら、空な色を返す
@@ -151,13 +158,18 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 	const Sphere* p = &obj[min_idx];
 	const Material* m = &p->material;
 	Vector3 new_pos = add(pos, scale(dir, min_t));// 少し前に出して再判定されるのを防ぐ
-	Vector3 normal = normalize(sub(new_pos, p->center));
+	Vector3 normal = normalize(sub(new_pos, p->center)); //球なので中心から各点への向きが法線となる
 
-	// 発光
+	// 発光(拡散反射したものは発光で)
 	float emmisive = 1.0f - m->reflection - m->transmission;
 	col = { 0.0f, 0.0f, 0.0f };// 発光がなければ黒
 	if (0.0f < emmisive) {
-		col = scale(p->material.albedo, emmisive);
+		//col = scale(p->material.albedo, emmisive);
+		Vector3 L = scale(p->material.albedo, cos(emmisive));
+		col = add(col, scale(L, normal.x));
+		col = add(col, scale(L, normal.y));
+		col = add(col, scale(L, normal.z));
+		col = add(col, L);
 	}
 
 	// 反射
@@ -165,12 +177,18 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
 		col = add(col, scale(RayTracing(new_pos, reflect, depth, index), m->reflection));
 	}
-	// 屈折
+	else
+	{
+		Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
+		col = add(col, reflect);
+	}
+
+	// 屈折（スネルの法則）
 	if (0.0f < m->transmission) {
 		float new_index = (0.0f < dot(dir, normal)) ? 1.0f : m->refraction_index; // 出ていくか入っていくか?
 		Vector3 vert = scale(normal, dot(dir, normal));// 垂直成分
 		Vector3 pall = sub(dir, vert);// 平行成分
-		Vector3 reflact = normalize(add(vert, scale(pall, index / new_index)));
+		Vector3 reflact = normalize(add(vert, scale(pall, index / new_index))); //屈折ベクトル
 		new_pos = add(new_pos, scale(reflact, 0.01f));
 		col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
 	}
@@ -192,16 +210,16 @@ int main()
 	// カメラ・スクリーンの設定
 	float fov = 0.6f * 0.5f * PI;
 	float aspect = (float)HEIGHT / (float)WIDTH;
-	Vector3 camera_pos = {0.0f, 1.0f, 3.0f}; // カメラの位置
-	Vector3 camera_up  = {0.0f, 1.0f, 0.0f};   // カメラの上方向
-	Vector3 camera_dir = {0.0f,-0.2f, -1.0f};  // 視線方向
-	
+	Vector3 camera_pos = { 0.0f, 1.0f, 3.0f }; // カメラの位置
+	Vector3 camera_up = { 0.0f, 1.0f, 0.0f };   // カメラの上方向
+	Vector3 camera_dir = { 0.0f,-0.2f, -1.0f };  // 視線方向
+
 	// レイトレーシングの計算
 	for (int y = 0; y < HEIGHT; y++) {
 		for (int x = 0; x < WIDTH; x++) {
 			float u = ((float)x + 0.5f) / (float)WIDTH;
 			float v = ((float)y + 0.5f) / (float)HEIGHT;
-			
+
 			Vector3 dir = get_ray_dir(u, v, camera_up, camera_dir, fov, aspect);
 			image[y * WIDTH + x] = RayTracing(camera_pos, dir);
 		}
@@ -230,4 +248,3 @@ int main()
 	free(file_image);
 	free(image);
 }
-
