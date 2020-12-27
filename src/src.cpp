@@ -125,10 +125,10 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 	// オブジェクト定義
 	Sphere obj[] = {
 		//  x        y        z          r       R      G      B     反射  透過  屈折率
-		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{1.00f, 0.00f, 0.00f}, 0.02f,0.0f} },// 空中の球(赤)
+		{{ 0.0f,    1.5f,    -3.0f},     1.0f, {{0.00f, 1.00f, 0.00f}, 0.50f,0.0f} },// 空中の球(赤)
 		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.80f, 0.10f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折)
 		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)
-		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
+		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.84f, 0.24f, 0.34f}, 0.0f, 0.0f} },// 地面
 		{{1000.0f, 10000.0f,500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
 	};
 
@@ -192,9 +192,9 @@ int main()
 	// カメラ・スクリーンの設定
 	float fov = 0.6f * 0.5f * PI;
 	float aspect = (float)HEIGHT / (float)WIDTH;
-	Vector3 camera_pos = {0.0f, 1.0f, 3.0f}; // カメラの位置
+	Vector3 camera_pos = {0.0f, 2.0f, 3.0f}; // カメラの位置
 	Vector3 camera_up  = {0.0f, 1.0f, 0.0f};   // カメラの上方向
-	Vector3 camera_dir = {0.0f,-0.2f, -1.0f};  // 視線方向
+	Vector3 camera_dir = {0.0f, -0.1f, -1.0f};  // 視線方向
 	
 	// レイトレーシングの計算
 	for (int y = 0; y < HEIGHT; y++) {
