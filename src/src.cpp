@@ -114,6 +114,7 @@ float is_collide(const Sphere *p, const Vector3 pos, const Vector3 dir)
 	return (-b + sqrtf(discriminant)) / a;// 奥の交点を返す
 }
 
+
 /// ■ レイトレコア
 Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float index = 1.0f)
 {
@@ -128,6 +129,7 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{1.00f, 0.00f, 0.00f}, 0.02f,0.0f} },// 空中の球(赤)
 		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.80f, 0.10f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折)
 		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)
+		{{ 0.0f,    1.0f,    0.5f},     0.5f, {{0.00f, 1.00f, 0.00f}, 0.02f,0.0f} },
 		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
 		{{1000.0f, 10000.0f,500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
 	};
@@ -161,11 +163,11 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 	}
 
 	// 反射
-	if (0.0f < m->reflection) {
+	if (0.5f < m->reflection) {
 		Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
 		col = add(col, scale(RayTracing(new_pos, reflect, depth, index), m->reflection));
 	}
-	// 屈折
+
 	if (0.0f < m->transmission) {
 		float new_index = (0.0f < dot(dir, normal)) ? 1.0f : m->refraction_index; // 出ていくか入っていくか?
 		Vector3 vert = scale(normal, dot(dir, normal));// 垂直成分
@@ -174,6 +176,7 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		new_pos = add(new_pos, scale(reflact, 0.01f));
 		col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
 	}
+	
 
 	return col;
 }
@@ -195,6 +198,8 @@ int main()
 	Vector3 camera_pos = {0.0f, 1.0f, 3.0f}; // カメラの位置
 	Vector3 camera_up  = {0.0f, 1.0f, 0.0f};   // カメラの上方向
 	Vector3 camera_dir = {0.0f,-0.2f, -1.0f};  // 視線方向
+
+
 	
 	// レイトレーシングの計算
 	for (int y = 0; y < HEIGHT; y++) {
