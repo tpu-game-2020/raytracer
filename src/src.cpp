@@ -117,7 +117,7 @@ float is_collide(const Sphere *p, const Vector3 pos, const Vector3 dir)
 /// ■ レイトレコア
 Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float index = 1.0f)
 {
-	Vector3 col = { 0.97f, 1.00f, 1.00f };// 何も衝突しないときは空な色
+	Vector3 col = { 0.00f, 0.80f, 1.00f };// 何も衝突しないときは空な色　　// [変更] 色
 
 	// 何度も反射する場合は途中で打ち切り
 	if (10 < ++depth) return col;
@@ -125,10 +125,10 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 	// オブジェクト定義
 	Sphere obj[] = {
 		//  x        y        z          r       R      G      B     反射  透過  屈折率
-		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{1.00f, 0.00f, 0.00f}, 0.02f,0.0f} },// 空中の球(赤)
-		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.80f, 0.10f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折)
-		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)
-		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
+		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{0.50f, 0.00f, 0.50f}, 0.02f,0.0f} },// 空中の球(赤)  // [変更] 色
+		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 1.00f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折) 　// [変更] 色
+		{{-2.0f,    0.1f,   -1.0f},     0.5f, {{1.00f, 1.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)　// [変更] 色、y座標（球体が地面に半分弱埋まるようにした。）
+		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.50f, 0.50f, 0.50f}, 0.10f, 0.0f, 2.4f} },// 地面　// [追加] 色、反射、屈折率
 		{{1000.0f, 10000.0f,500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
 	};
 
@@ -175,6 +175,28 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
 	}
 
+	// [追加] 影
+	Vector3 obj_pos = obj[4].center;		//物体の位置
+	Vector3 obj_up = { 0.0f,1.0f,0.0f };	//カメラの上方向
+	Vector3 obj_dir = obj[min_idx].center;	//視線方向（物体から光源への）
+	float t2 = -1;
+	for (int i = 0; i < sizeof(obj) / sizeof(obj[0]); i++)
+	{
+		if (i != min_idx && i != 4)
+		{
+			// 一番近いオブジェクトを検索
+			t2 = is_collide(&obj[i], obj_pos, dir);
+		}
+	}
+	// [追加] 物体と光源の間に他の物体があったら黒
+	if (0.0001f < t2)
+	{
+		if (0.0f < m->reflection)
+			col = { 0.3f, 0.f, 0.3f };  //影が真っ黒すぎると不自然なので少し紫ががるようにした。
+		if (0.0f < m->transmission)
+			col = sub(col, { 0.1f,0.1f,0.1f });
+	}
+
 	return col;
 }
 
@@ -190,11 +212,12 @@ int main()
 	if (image == NULL) return -1;// メモリ確保の失敗
 
 	// カメラ・スクリーンの設定
+	// [変更] 影が見えやすいように微調整した。
 	float fov = 0.6f * 0.5f * PI;
 	float aspect = (float)HEIGHT / (float)WIDTH;
 	Vector3 camera_pos = {0.0f, 1.0f, 3.0f}; // カメラの位置
 	Vector3 camera_up  = {0.0f, 1.0f, 0.0f};   // カメラの上方向
-	Vector3 camera_dir = {0.0f,-0.2f, -1.0f};  // 視線方向
+	Vector3 camera_dir = {0.0f,-0.40f, -1.0f};  // 視線方向
 	
 	// レイトレーシングの計算
 	for (int y = 0; y < HEIGHT; y++) {
