@@ -13,6 +13,7 @@
 // 標準ライブラリ
 #include <math.h>
 
+
 // stb(画像読み書きライブラリ)
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image.h"
@@ -161,6 +162,8 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 	}
 
 	// 反射
+	//ここで視線が物体と交差した場所から光源へのベクトルを求めて
+	//そのベクトルが物体と交差していない時のみ反射するようにすれば影が作れる？
 	if (0.0f < m->reflection) {
 		Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
 		col = add(col, scale(RayTracing(new_pos, reflect, depth, index), m->reflection));
