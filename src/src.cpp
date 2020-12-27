@@ -117,7 +117,7 @@ float is_collide(const Sphere *p, const Vector3 pos, const Vector3 dir)
 /// ■ レイトレコア
 Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float index = 1.0f)
 {
-	Vector3 col = { 0.97f, 1.00f, 1.00f };// 何も衝突しないときは空な色
+	Vector3 col = { 0.76f, 0.64f, 0.44f };// 何も衝突しないときは空な色
 
 	// 何度も反射する場合は途中で打ち切り
 	if (10 < ++depth) return col;
@@ -128,6 +128,8 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{1.00f, 0.00f, 0.00f}, 0.02f,0.0f} },// 空中の球(赤)
 		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.80f, 0.10f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折)
 		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)
+		{{ 1.0f,    1.5f,    1.0f},     0.3f, {{0.00f, 0.00f, 1.00f}, 0.00f,0.0f} },//左目
+		{{-1.0f,    1.5f,    1.0f},     0.3f, {{0.00f, 0.00f, 1.00f}, 0.00f,0.0f} },//右目
 		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
 		{{1000.0f, 10000.0f,500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
 	};
