@@ -24,6 +24,7 @@
 
 #define WIDTH 1920
 #define HEIGHT 1080
+#define MaxDepth = 5
 
 /// ■ ベクトルライブラリ
 typedef struct {
@@ -126,10 +127,10 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 	Sphere obj[] = {
 		//  x        y        z          r       R      G      B     反射  透過  屈折率
 		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{1.00f, 0.00f, 0.00f}, 0.02f,0.0f} },// 空中の球(赤)
-		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.80f, 0.10f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折)
-		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)
-		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
-		{{1000.0f, 10000.0f,500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
+		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.40f, 0.10f}, 0.75f,0.00f} },// 空中の球(屈折)
+		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.40f}, 0.00f,0.80f,2.4f} },// 空中の球(反射)
+		{{ 0.0f,   -100000.0f,   0.0f}, 100000.f, {{0.10f, 0.00f, 0.0f}, 0.5f, 0.0f} },// 地面
+		{{1000.0f,  10000.0f, 500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
 	};
 
 	float min_t = 100000000000.0f;// 十分遠い場所
@@ -152,6 +153,7 @@ Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float in
 	const Material* m = &p->material;
 	Vector3 new_pos = add(pos, scale(dir, min_t));// 少し前に出して再判定されるのを防ぐ
 	Vector3 normal = normalize(sub(new_pos, p->center));
+
 
 	// 発光
 	float emmisive = 1.0f - m->reflection - m->transmission;

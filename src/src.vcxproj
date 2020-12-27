@@ -141,6 +141,9 @@
   <ItemGroup>
     <ClCompile Include="src.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\stdlib.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
