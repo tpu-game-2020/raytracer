@@ -30,26 +30,26 @@ typedef struct {
 	float x, y, z;
 }Vector3;
 
-Vector3 add(const Vector3 v0, const Vector3 v1)
+Vector3 add(const Vector3 v0, const Vector3 v1) //加算
 {
 	Vector3 ret = {v0.x + v1.x, v0.y + v1.y, v0.z + v1.z};
 	return ret;
 }
-Vector3 sub(const Vector3 v0, const Vector3 v1)
+Vector3 sub(const Vector3 v0, const Vector3 v1) //減算
 {
 	Vector3 ret = { v0.x - v1.x, v0.y - v1.y, v0.z - v1.z };
 	return ret;
 }
-Vector3 scale(const Vector3 v, float f)
+Vector3 scale(const Vector3 v, float f) //スカラー倍
 {
 	Vector3 ret = {v.x * f, v.y * f, v.z * f};
 	return ret;
 }
-float dot(const Vector3 v0, const Vector3 v1) 
+float dot(const Vector3 v0, const Vector3 v1) //ドット積
 {
 	return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
 }
-Vector3 cross(const Vector3 v0, const Vector3 v1)
+Vector3 cross(const Vector3 v0, const Vector3 v1) //クロス積
 {
 	Vector3 ret = {
 		v0.y * v1.z - v0.z * v1.y,
@@ -58,7 +58,7 @@ Vector3 cross(const Vector3 v0, const Vector3 v1)
 	};
 	return ret;
 }
-Vector3 normalize(const Vector3 v)
+Vector3 normalize(const Vector3 v)//正規化
 {
 	float len = sqrtf(dot(v, v));
 	Vector3 ret = {v.x / len, v.y / len, v.z / len};
@@ -91,9 +91,9 @@ typedef struct {
 } Material;
 
 typedef struct {
-	Vector3 center;
-	float radisu;
-	Material material;
+	Vector3 center;//中心地
+	float radisu;//半径
+	Material material;//マテリアル上記
 } Sphere;
 
 // 交差判定
@@ -117,62 +117,90 @@ float is_collide(const Sphere *p, const Vector3 pos, const Vector3 dir)
 /// ■ レイトレコア
 Vector3 RayTracing(const Vector3 pos, const Vector3 dir, int depth = 0, float index = 1.0f)
 {
-	Vector3 col = { 5.00f,0.97f, 1.00f };// 何も衝突しないときは空な色
+	Vector3 col = {0.75f,1.00f, 1.00f };// 何も衝突しないときは空な色　変更点：空の色が薄かったので値を変更し、見やすいように濃くした。
 
 	// 何度も反射する場合は途中で打ち切り
 	if (10 < ++depth) return col;
 
-	// オブジェクト定義
+	// オブジェクト定義 変更点：バウンディングボリュームの追加
 	Sphere obj[] = {
 		//  x        y        z          r       R      G      B     反射  透過  屈折率
-		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{1.00f, 0.00f, 0.00f}, 0.02f,0.0f} },// 空中の球(赤)
-		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.02f, 0.80f, 0.10f}, 0.02f,0.93f, 2.4f} },// 空中の球(屈折)
-		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.95f,0.0f} },// 空中の球(反射)
-		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.0f, 0.0f} },// 地面
+		{{ 0.0f,    0.5f,    1.0f},     0.6f, {{1.0f, 1.0f, 1.0f}, 0.0f,1.0f,1.0f}},// 空中の球(赤)の囲い(バウンディングボリューム)
+		{{ 0.0f,    0.5f,    1.0f},     0.5f, {{0.75f, 0.00f, 0.00f}, 0.30f,0.0f} },// 空中の球(赤) 変更点：赤色の調整、反射率の調整
+		{{ 2.0f,    0.5f,   -1.0f},     0.6f, {{1.0f, 1.0f, 1.0f}, 0.0f,1.0f, 1.0f}},// 空中の球(屈折)の囲い(バウンディングボリューム)
+		{{ 2.0f,    0.5f,   -1.0f},     0.5f, {{0.45f, 0.20f, 0.00f}, 0.09f,0.80f, 2.9f} },// 空中の球(屈折) 変更点：色や反射などの値を調整
+		{{-2.0f,    0.5f,   -1.0f},     0.6f, {{1.0f, 1.0f, 1.0f}, 0.0f,1.0f,1.0f}},// 空中の球(反射)の囲い(バウンディングボリューム)
+		{{-2.0f,    0.5f,   -1.0f},     0.5f, {{0.00f, 0.00f, 0.00f}, 0.85f,0.0f} },// 空中の球(反射) 変更点：反射の値を調整
+		{{ 0.0f, -100000.0f, 0.0f}, 100000.f, {{0.76f, 0.64f, 0.44f}, 0.25f, 0.0f} },// 地面 変更点：反射の値を調整
 		{{1000.0f, 10000.0f,500.0f},  1000.f, {{1000.f,990.0f,980.0f},0.0f, 0.0f} },// 太陽
+
 	};
 
 	float min_t = 100000000000.0f;// 十分遠い場所
 	int min_idx = -1;
+	int bvnot = sizeof(obj) / sizeof(obj[0])- 3;//バウンディングボリュームがない地面と太陽を除いたもの
+
+	//交差判定の時にバウンディングボリュームを加えることで高速化
 	for (int i = 0; i < sizeof(obj)/sizeof(obj[0]); i++) 
 	{
-		// 一番近いオブジェクトを検索
-		float t = is_collide(&obj[i], pos, dir);
-		if (0.0001f < t && t < min_t) {// 何度も衝突するのを防ぐために少し前の値を採用
-			min_t = t;
-			min_idx = i;
+
+		if (i <= bvnot)
+		{
+			// 一番近いオブジェクトを検索
+			float t = is_collide(&obj[i], pos, dir);
+			if (t >= 0) {
+				i++;
+				float t = is_collide(&obj[i], pos, dir);
+				if (0.0001f < t && t < min_t) {// 何度も衝突するのを防ぐために少し前の値を採用
+					min_t = t;
+					min_idx = i;
+				}
+			}
+		}
+		else
+		{
+			float t = is_collide(&obj[i], pos, dir);
+			if (0.0001f < t && t < min_t) {// 何度も衝突するのを防ぐために少し前の値を採用
+					min_t = t;
+					min_idx = i;
+			}
+		}
+
+	}
+
+	if (min_idx >= 0)
+	{	// 色計算
+		const Sphere* p = &obj[min_idx];
+		const Material* m = &p->material;
+		Vector3 new_pos = add(pos, scale(dir, min_t));// 少し前に出して再判定されるのを防ぐ
+		Vector3 normal = normalize(sub(new_pos, p->center));
+
+		// 発光
+		float emmisive = 1.0f - m->reflection - m->transmission;
+		col = { 0.0f, 0.0f, 0.0f };// 発光がなければ黒
+		if (0.0f < emmisive) {
+			col = scale(p->material.albedo, emmisive);
+		}
+
+		// 反射
+		if (0.0f < m->reflection) {
+			Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
+			col = add(col, scale(RayTracing(new_pos, reflect, depth, index), m->reflection));
+		}
+
+
+		// 屈折
+		if (0.0f < m->transmission) {
+			float new_index = (0.0f < dot(dir, normal)) ? 1.0f : m->refraction_index; // 出ていくか入っていくか?
+			Vector3 vert = scale(normal, dot(dir, normal));// 垂直成分
+			Vector3 pall = sub(dir, vert);// 平行成分
+			Vector3 reflact = normalize(add(vert, scale(pall, index / new_index)));
+			new_pos = add(new_pos, scale(reflact, 0.01f));
+			col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
 		}
 	}
-
-	// 衝突しなかったら、空な色を返す
-	if (min_idx < 0) return col;
-
-	// 色計算
-	const Sphere* p = &obj[min_idx];
-	const Material* m = &p->material;
-	Vector3 new_pos = add(pos, scale(dir, min_t));// 少し前に出して再判定されるのを防ぐ
-	Vector3 normal = normalize(sub(new_pos, p->center));
-
-	// 発光
-	float emmisive = 1.0f - m->reflection - m->transmission;
-	col = { 0.0f, 0.0f, 0.0f };// 発光がなければ黒
-	if (0.0f < emmisive) {
-		col = scale(p->material.albedo, emmisive);
-	}
-
-	// 反射
-	if (0.0f < m->reflection) {
-		Vector3 reflect = add(dir, scale(normal, -2.0f * dot(normal, dir)));
-		col = add(col, scale(RayTracing(new_pos, reflect, depth, index), m->reflection));
-	}
-	// 屈折
-	if (0.0f < m->transmission) {
-		float new_index = (0.0f < dot(dir, normal)) ? 1.0f : m->refraction_index; // 出ていくか入っていくか?
-		Vector3 vert = scale(normal, dot(dir, normal));// 垂直成分
-		Vector3 pall = sub(dir, vert);// 平行成分
-		Vector3 reflact = normalize(add(vert, scale(pall, index / new_index)));
-		new_pos = add(new_pos, scale(reflact, 0.01f));
-		col = add(col, scale(RayTracing(new_pos, reflact, depth, new_index), m->transmission));
+	else if(min_idx < 0){
+		return col;// 衝突しなかったら、空な色を返す
 	}
 
 	return col;
@@ -189,10 +217,10 @@ int main()
 	Vector3* image = (Vector3*)malloc(sizeof(Vector3) * WIDTH * HEIGHT);
 	if (image == NULL) return -1;// メモリ確保の失敗
 
-	// カメラ・スクリーンの設定
+	// カメラ・スクリーンの設定 変更点：カメラの調整
 	float fov = 0.6f * 0.5f * PI;
 	float aspect = (float)HEIGHT / (float)WIDTH;
-	Vector3 camera_pos = {0.0f, 1.0f, 3.0f}; // カメラの位置
+	Vector3 camera_pos = {0.0f, 0.7f, 3.2f}; // カメラの位置
 	Vector3 camera_up  = {0.0f, 1.0f, 0.0f};   // カメラの上方向
 	Vector3 camera_dir = {0.0f,-0.2f, -1.0f};  // 視線方向
 	
